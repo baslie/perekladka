@@ -20,6 +20,10 @@
 html,
 body {
   margin: 0;
+  /* При дробном масштабе (Windows 110–150%) закреплённые сцены выходят за окно на
+     доли пикселя — появляется горизонтальный скролл. clip, а не hidden: hidden делает
+     body скролл-контейнером и ломает закрепление ScrollTrigger. */
+  overflow-x: clip;
   background: var(--night);
   color: var(--paper);
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
