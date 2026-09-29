@@ -3,17 +3,118 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Перекладка — лаборатория скроллителлинга</title>
+  <title>Рассвет — перекладка</title>
   <meta name="description" content="Сайт-эксперимент: история в стиле перекладной анимации, которая оживает при прокрутке.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2214%22 fill=%22%23ffd98a%22/%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- Прототип на заглушках: каждый цветной блок подписан именем будущего ассета из docs/storyboard.md.
+       ?debug в адресе включает маркеры ScrollTrigger и счётчик прогресса сцены. -->
+  <div class="progress" aria-hidden="true"><div class="progress__bar"></div></div>
+
   <main>
-    <section class="intro">
-      <h1>Перекладка</h1>
-      <p>Лаборатория скроллителлинга. Скоро здесь оживёт история Лёвы.</p>
+    <!-- 1. Окно: наезд камеры сквозь окно -->
+    <section class="scene s-window" id="window" data-length="200" aria-label="Окно">
+      <div class="camera">
+        <div class="layer l-city" data-asset="window-city"></div>
+        <div class="window-frame" data-asset="window-room"></div>
+        <div class="hero hero--window">
+          <div class="pose" data-pose="hero-back-window"></div>
+        </div>
+      </div>
+      <div class="title">
+        <h1>Рассвет</h1>
+        <p>Листайте вниз</p>
+      </div>
+      <div class="fade"></div>
+    </section>
+
+    <!-- 2. Улица: горизонтальный параллакс внутри вертикального скролла -->
+    <section class="scene s-street" id="street" data-length="300" aria-label="Улица">
+      <div class="layer l-street-sky" data-asset="street-sky"></div>
+      <div class="strip l-street-far" data-asset="street-far"></div>
+      <div class="strip l-street-near" data-asset="street-near"></div>
+      <div class="hero hero--street">
+        <div class="pose" data-pose="hero-walk-a"></div>
+        <div class="pose" data-pose="hero-walk-b"></div>
+        <div class="pose" data-pose="hero-walk-c"></div>
+      </div>
+      <div class="strip l-street-lamps" data-asset="street-lamps"></div>
+      <p class="caption">Город ещё спит.</p>
+    </section>
+
+    <!-- 3. Опушка: шторка-маска и смена поз -->
+    <section class="scene s-edge" id="edge" data-length="200" aria-label="Опушка">
+      <div class="layer l-edge-city"></div>
+      <div class="reveal">
+        <div class="layer l-edge-sky" data-asset="edge-sky"></div>
+        <div class="layer l-edge-trees" data-asset="edge-trees"></div>
+        <div class="layer l-edge-ground" data-asset="edge-ground"></div>
+        <div class="hero hero--edge">
+          <div class="pose" data-pose="hero-back"></div>
+          <div class="pose" data-pose="hero-three-quarter"></div>
+          <div class="pose" data-pose="hero-front"></div>
+          <div class="pose" data-pose="hero-wave"></div>
+        </div>
+      </div>
+      <p class="caption">У края леса он оглядывается.</p>
+    </section>
+
+    <!-- 4. Лес: движение камеры вглубь -->
+    <section class="scene s-forest" id="forest" data-length="250" aria-label="Лес">
+      <div class="layer l-forest-far" data-asset="forest-far"></div>
+      <div class="layer l-forest-mid" data-asset="forest-mid"></div>
+      <div class="layer l-forest-path" data-asset="forest-path"></div>
+      <div class="hero hero--forest">
+        <div class="pose" data-pose="hero-away-a"></div>
+        <div class="pose" data-pose="hero-away-b"></div>
+      </div>
+      <div class="layer l-forest-front-left" data-asset="forest-front-left"></div>
+      <div class="layer l-forest-front-right" data-asset="forest-front-right"></div>
+      <p class="caption">Тропа уводит всё глубже.</p>
+    </section>
+
+    <!-- 5. Склон: цвет неба по скроллу, диагональ -->
+    <section class="scene s-slope" id="slope" data-length="200" aria-label="Склон">
+      <div class="layer l-slope-sky" data-asset="slope-sky"></div>
+      <div class="layer l-slope-hill" data-asset="slope-hill"></div>
+      <div class="hero hero--slope">
+        <div class="pose" data-pose="hero-climb-a"></div>
+        <div class="pose" data-pose="hero-climb-b"></div>
+      </div>
+      <div class="layer l-slope-grass" data-asset="slope-grass"></div>
+      <p class="caption">Небо начинает светлеть.</p>
+    </section>
+
+    <!-- 6. Рассвет: солнце, свет, отъезд и крупный план -->
+    <section class="scene s-dawn" id="dawn" data-length="250" aria-label="Рассвет">
+      <div class="camera">
+        <div class="layer l-dawn-sky" data-asset="dawn-sky"></div>
+        <div class="sun" data-asset="dawn-sun"></div>
+        <div class="layer l-dawn-hills" data-asset="dawn-hills"></div>
+        <div class="layer l-dawn-summit" data-asset="dawn-summit"></div>
+        <div class="hero hero--dawn">
+          <div class="pose" data-pose="hero-summit"></div>
+        </div>
+      </div>
+      <div class="light"></div>
+      <div class="closeup" data-asset="hero-face-closeup"><div class="face"></div></div>
+      <p class="caption">И тогда встаёт солнце.</p>
+    </section>
+
+    <!-- 7. Финал: без анимации -->
+    <section class="s-final" id="final" aria-label="Финал">
+      <h2>Рассвет</h2>
+      <p>Эксперимент со скроллителлингом в стиле перекладки: вырезанные фигуры, слои и камера, которыми управляет прокрутка.</p>
+      <p><a href="https://github.com/baslie/perekladka">Как это сделано</a></p>
     </section>
   </main>
+
+  <div class="hud" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js" defer></script>
   <script src="js/main.js" defer></script>
 </body>
 </html>
