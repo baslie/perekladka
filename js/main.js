@@ -4,6 +4,11 @@
 // а её таймлайн нормирован на длительность 1: позиции в коде — доли прокрутки сцены,
 // ровно как в таблице раскадровки.
 //
+// Плавная прокрутка — Lenis, по официальной связке с GSAP (README lenis, «GSAP ScrollTrigger»):
+// Lenis крутится от тикера GSAP, каждое его событие прокрутки обновляет ScrollTrigger.
+// Инерцию даёт Lenis, поэтому у сцен scrub: true — второе сглаживание сверху дало бы
+// ощущение «ватной» прокрутки.
+//
 // ?debug в адресе — маркеры ScrollTrigger и счётчик «сцена / прогресс».
 
 (() => {
@@ -11,6 +16,17 @@
 
   gsap.registerPlugin(ScrollTrigger);
   ScrollTrigger.config({ ignoreMobileResize: true });
+
+  // Без Lenis (CDN недоступен) всё работает на обычной прокрутке.
+  // При «уменьшить движение» Lenis сам отключает сглаживание (respectReducedMotion).
+  // На тач-экранах прокрутка остаётся нативной (syncTouch: false по умолчанию).
+  if (window.Lenis) {
+    const lenis = new Lenis({ lerp: 0.1, anchors: true });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => lenis.raf(time * 1000)); // тикер GSAP — в секундах, Lenis ждёт мс
+    gsap.ticker.lagSmoothing(0);
+    window.lenis = lenis; // для отладки из консоли
+  }
 
   const DEBUG = new URLSearchParams(location.search).has('debug');
   const STEP = 0.002; // смена позы в шаге — практически мгновенная
@@ -27,7 +43,7 @@
         start: 'top top',
         end: `+=${section.dataset.length}%`,
         pin: true,
-        scrub: 0.6,
+        scrub: true,
         invalidateOnRefresh: true,
         markers: DEBUG,
         onUpdate: DEBUG ? (st) => (hud.textContent = `${id} ${(st.progress * 100).toFixed(0)}%`) : undefined,
