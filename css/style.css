@@ -364,7 +364,8 @@ img {
 
 .title h1 {
   margin: 0;
-  font-size: clamp(4rem, 15vw, 10.5rem);
+  /* В альбомном телефоне 15vw выше трети экрана — ограничиваем и по высоте. */
+  font-size: clamp(3.5rem, min(15vw, calc(var(--vh) * 0.26)), 10.5rem);
   font-weight: 600;
   line-height: 0.9;
   letter-spacing: -0.01em;
@@ -849,16 +850,31 @@ img {
   }
 
   /* Закулисье в портрете — кадр вписан в ширину экрана, а не накрывает его:
-     иначе стопка вырезок шириной в три экрана не помещается. */
+     иначе стопка вырезок шириной в три экрана не помещается. Кадр выше 16:9 —
+     слои с object-fit: cover просто срезают бока, а табличкам хватает места. */
   .s-backstage .frame {
-    width: 92vw;
-    height: calc(92vw * 0.5625);
-    margin: calc(92vw * -0.28125) 0 0 -46vw;
+    --bw: 92vw;
+    --bh: min(130vw, calc(var(--vh) * 0.64));
+    width: var(--bw);
+    height: var(--bh);
+    margin: calc(var(--bh) / -2) 0 0 calc(var(--bw) / -2);
+  }
+
+  .s-backstage .sun {
+    top: 22%;
+    width: 34%;
+    margin-left: -17%;
   }
 
   .tag {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
   }
+
+  .plate--sky .tag { left: 4%; top: 4%; }
+  .plate--sun .tag { left: auto; right: 2%; top: 13%; }
+  .plate--hills .tag { left: auto; right: 2%; top: 44%; }
+  .plate--summit .tag { left: 22%; top: 86%; }
+  .plate--hero .tag { left: 50%; top: 62%; }
 }
 
 @media (max-width: 700px) {

@@ -130,7 +130,7 @@
       const active = triggers.some((st) => st && st.isActive);
       section.classList.toggle('is-idle', !active);
       breath.forEach((tw) => tw.paused(!active));
-      nav.active(id, tl.scrollTrigger.isActive);
+      nav.active(id, Boolean(tl.scrollTrigger.isActive)); // isActive бывает undefined
     };
     idle.push(update);
   }
@@ -162,6 +162,7 @@
     const root = document.querySelector('.scenes');
     const links = new Map([...root.querySelectorAll('a')].map((a) => [a.hash.slice(1), a]));
     const narrow = window.matchMedia('(max-width: 700px)');
+    const on = new Set(); // сцены, чей pin сейчас активен
 
     root.addEventListener('click', (event) => {
       const link = event.target.closest('a');
@@ -188,8 +189,12 @@
         const fill = links.get(id)?.firstElementChild;
         if (fill) fill.style.transform = narrow.matches ? `scaleX(${p})` : `scaleY(${p})`;
       },
-      active(id, on) {
-        links.get(id)?.classList.toggle('is-active', on);
+      // На стыке сцен активны обе — подсвечиваем только наезжающую, иначе подписи налезают.
+      active(id, state) {
+        if (state) on.add(id);
+        else on.delete(id);
+        const last = [...links.keys()].filter((key) => on.has(key)).pop();
+        links.forEach((a, key) => a.classList.toggle('is-active', key === last));
       },
     };
   })();
