@@ -13,6 +13,7 @@
   ScrollTrigger.config({ ignoreMobileResize: true });
 
   const DEBUG = new URLSearchParams(location.search).has('debug');
+  const STEP = 0.002; // смена позы в шаге — практически мгновенная
   const hud = document.querySelector('.hud');
   if (DEBUG) hud.hidden = false;
 
@@ -36,7 +37,11 @@
     tl.set({}, {}, 1); // длительность ровно 1, даже если последний твин кончается раньше
   }
 
-  /** Показать позу героя с номером index в момент at — короткое перекрёстное затухание. */
+  /**
+   * Показать позу героя с номером index в момент at. fade — длина перекрёстного затухания:
+   * для шагов почти ноль (стоп-моушен, иначе на смене видны две полупрозрачные позы),
+   * для поворотов — заметное.
+   */
   function showPose(tl, hero, index, at, fade = 0.02) {
     hero.querySelectorAll('.pose').forEach((pose, i) => {
       tl.to(pose, { autoAlpha: i === index ? 1 : 0, duration: fade }, at);
@@ -63,12 +68,12 @@
     // 2. Улица — горизонтальный параллакс, шаги
     scene('street', (tl, q) => {
       const shift = (el) => () => -(el.offsetWidth - window.innerWidth);
-      for (const sel of ['.l-street-far', '.l-street-near', '.l-street-lamps']) {
+      for (const sel of ['.strip--far', '.strip--near', '.strip--lamps']) {
         tl.to(q(sel), { x: shift(q(sel)), duration: 1 }, 0);
       }
       const hero = q('.hero');
       const steps = 12;
-      for (let i = 0; i < steps; i++) showPose(tl, hero, i % 3, i / steps);
+      for (let i = 0; i < steps; i++) showPose(tl, hero, i % 3, i / steps, STEP);
       tl.to(hero, { y: -8, duration: 1 / (steps * 2), repeat: steps * 2 - 1, yoyo: true, ease: 'sine.inOut' }, 0);
       caption(tl, q('.caption'), 0.05, 0.8);
     });
@@ -84,35 +89,33 @@
       caption(tl, q('.caption'), 0.35, 0.9);
     });
 
-    // 4. Лес — камера вглубь: чем ближе слой, тем сильнее растёт
+    // 4. Лес — камера вглубь: чем ближе слой, тем сильнее растёт и быстрее уходит к краю
     scene('forest', (tl, q) => {
-      tl.to(q('.l-forest-front-left'), { xPercent: -100, scale: 3, transformOrigin: '100% 50%', duration: 1 }, 0);
-      tl.to(q('.l-forest-front-right'), { xPercent: 100, scale: 3, transformOrigin: '0% 50%', duration: 1 }, 0);
-      tl.to(q('.l-forest-mid'), { scale: 1.6, duration: 1 }, 0);
-      tl.to(q('.l-forest-far'), { scale: 1.15, duration: 1 }, 0);
-      tl.to(q('.l-forest-path'), { scale: 1.4, transformOrigin: '50% 0%', duration: 1 }, 0);
+      tl.to(q('.l-forest-front-left'), { xPercent: -45, scale: 1.8, transformOrigin: '0% 50%', duration: 1 }, 0);
+      tl.to(q('.l-forest-front-right'), { xPercent: 45, scale: 1.8, transformOrigin: '100% 50%', duration: 1 }, 0);
+      tl.to(q('.l-forest-mid'), { scale: 1.5, duration: 1 }, 0);
+      tl.to(q('.l-forest-far'), { scale: 1.12, transformOrigin: '50% 55%', duration: 1 }, 0);
       const hero = q('.hero');
       tl.to(hero, { scale: 0.45, y: '-30vh', duration: 1 }, 0);
-      for (let i = 0; i < 10; i++) showPose(tl, hero, i % 2, i / 10);
+      for (let i = 0; i < 10; i++) showPose(tl, hero, i % 2, i / 10, STEP);
       caption(tl, q('.caption'), 0.05, 0.75);
     });
 
     // 5. Склон — небо светлеет, герой идёт по диагонали вверх
     scene('slope', (tl, q) => {
-      const sky = q('.l-slope-sky');
+      const sky = q('.sky--slope');
       tl.to(sky, { backgroundColor: '#3b2f5c', duration: 0.5 }, 0);
       tl.to(sky, { backgroundColor: '#e89a8a', duration: 0.5 }, 0.5);
       tl.to(q('.l-slope-hill'), { x: '-4vw', y: '4vh', duration: 1 }, 0);
-      tl.to(q('.l-slope-grass'), { x: '-10vw', y: '8vh', duration: 1 }, 0);
       const hero = q('.hero');
       tl.to(hero, { x: '55vw', y: '-38vh', scale: 0.8, duration: 1 }, 0);
-      for (let i = 0; i < 8; i++) showPose(tl, hero, i % 2, i / 8);
+      for (let i = 0; i < 8; i++) showPose(tl, hero, i % 2, i / 8, STEP);
       caption(tl, q('.caption'), 0.1, 0.85);
     });
 
     // 6. Рассвет — солнце, свет, отъезд, крупный план
     scene('dawn', (tl, q) => {
-      tl.fromTo(q('.sun'), { y: '35vh' }, { y: 0, duration: 0.4, ease: 'power1.out' }, 0);
+      tl.fromTo(q('.sun'), { y: '33vh' }, { y: '-3vh', duration: 0.55, ease: 'power1.out' }, 0);
       tl.to(q('.light'), { opacity: 0.6, duration: 0.4 }, 0);
       tl.fromTo(q('.camera'), { scale: 1.4 }, { scale: 1, duration: 0.4, ease: 'power1.inOut' }, 0.2);
       caption(tl, q('.caption'), 0.1, 0.6);

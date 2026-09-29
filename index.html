@@ -6,21 +6,27 @@
   <title>Рассвет — перекладка</title>
   <meta name="description" content="Сайт-эксперимент: история в стиле перекладной анимации, которая оживает при прокрутке.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2214%22 fill=%22%23ffd98a%22/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="preload" as="image" href="assets/window/window-room.webp">
+  <link rel="preload" as="image" href="assets/window/window-city.webp">
+  <link rel="stylesheet" href="css/style.css?v=3">
 </head>
 <body>
-  <!-- Прототип на заглушках: каждый цветной блок подписан именем будущего ассета из docs/storyboard.md.
+  <!-- Раскадровка — docs/storyboard.md. Каждая сцена собрана в кадре .frame 16:9, который
+       накрывает экран (как object-fit: cover), поэтому слои из генераций 16:9 встают
+       в сцену по тем же координатам, что и на исходной картинке.
        ?debug в адресе включает маркеры ScrollTrigger и счётчик прогресса сцены. -->
   <div class="progress" aria-hidden="true"><div class="progress__bar"></div></div>
 
   <main>
     <!-- 1. Окно: наезд камеры сквозь окно -->
     <section class="scene s-window" id="window" data-length="200" aria-label="Окно">
-      <div class="camera">
-        <div class="layer l-city" data-asset="window-city"></div>
-        <div class="window-frame" data-asset="window-room"></div>
-        <div class="hero hero--window">
-          <div class="pose" data-pose="hero-back-window"></div>
+      <div class="frame">
+        <div class="camera">
+          <img class="layer" src="assets/window/window-city.webp" alt="">
+          <img class="layer" src="assets/window/window-room.webp" alt="">
+          <div class="hero hero--window">
+            <img class="pose" src="assets/hero/hero-back-window.webp" alt="">
+          </div>
         </div>
       </div>
       <div class="title">
@@ -32,30 +38,40 @@
 
     <!-- 2. Улица: горизонтальный параллакс внутри вертикального скролла -->
     <section class="scene s-street" id="street" data-length="300" aria-label="Улица">
-      <div class="layer l-street-sky" data-asset="street-sky"></div>
-      <div class="strip l-street-far" data-asset="street-far"></div>
-      <div class="strip l-street-near" data-asset="street-near"></div>
+      <div class="sky sky--street"></div>
+      <div class="strip strip--far"></div>
+      <div class="strip strip--near"></div>
+      <div class="ground ground--street"></div>
       <div class="hero hero--street">
-        <div class="pose" data-pose="hero-walk-a"></div>
-        <div class="pose" data-pose="hero-walk-b"></div>
-        <div class="pose" data-pose="hero-walk-c"></div>
+        <img class="pose" src="assets/hero/hero-walk-a.webp" alt="" loading="lazy">
+        <img class="pose" src="assets/hero/hero-walk-b.webp" alt="" loading="lazy">
+        <img class="pose" src="assets/hero/hero-walk-c.webp" alt="" loading="lazy">
       </div>
-      <div class="strip l-street-lamps" data-asset="street-lamps"></div>
+      <div class="strip strip--lamps">
+        <img src="assets/street/street-lamp.webp" alt="" loading="lazy">
+        <img src="assets/street/street-lamp.webp" alt="" loading="lazy">
+        <img src="assets/street/street-lamp.webp" alt="" loading="lazy">
+        <img src="assets/street/street-lamp.webp" alt="" loading="lazy">
+        <img src="assets/street/street-lamp.webp" alt="" loading="lazy">
+        <img src="assets/street/street-lamp.webp" alt="" loading="lazy">
+        <img src="assets/street/street-lamp.webp" alt="" loading="lazy">
+        <img src="assets/street/street-lamp.webp" alt="" loading="lazy">
+      </div>
       <p class="caption">Город ещё спит.</p>
     </section>
 
     <!-- 3. Опушка: шторка-маска и смена поз -->
     <section class="scene s-edge" id="edge" data-length="200" aria-label="Опушка">
-      <div class="layer l-edge-city"></div>
+      <div class="sky sky--street"></div>
       <div class="reveal">
-        <div class="layer l-edge-sky" data-asset="edge-sky"></div>
-        <div class="layer l-edge-trees" data-asset="edge-trees"></div>
-        <div class="layer l-edge-ground" data-asset="edge-ground"></div>
-        <div class="hero hero--edge">
-          <div class="pose" data-pose="hero-back"></div>
-          <div class="pose" data-pose="hero-three-quarter"></div>
-          <div class="pose" data-pose="hero-front"></div>
-          <div class="pose" data-pose="hero-wave"></div>
+        <div class="frame">
+          <img class="layer" src="assets/edge/edge-bg.webp" alt="" loading="lazy">
+          <div class="hero hero--edge">
+            <img class="pose" src="assets/hero/hero-back.webp" alt="" loading="lazy">
+            <img class="pose" src="assets/hero/hero-three-quarter.webp" alt="" loading="lazy">
+            <img class="pose" src="assets/hero/hero-front.webp" alt="" loading="lazy">
+            <img class="pose" src="assets/hero/hero-wave.webp" alt="" loading="lazy">
+          </div>
         </div>
       </div>
       <p class="caption">У края леса он оглядывается.</p>
@@ -63,43 +79,49 @@
 
     <!-- 4. Лес: движение камеры вглубь -->
     <section class="scene s-forest" id="forest" data-length="250" aria-label="Лес">
-      <div class="layer l-forest-far" data-asset="forest-far"></div>
-      <div class="layer l-forest-mid" data-asset="forest-mid"></div>
-      <div class="layer l-forest-path" data-asset="forest-path"></div>
-      <div class="hero hero--forest">
-        <div class="pose" data-pose="hero-away-a"></div>
-        <div class="pose" data-pose="hero-away-b"></div>
+      <div class="frame">
+        <img class="layer l-forest-far" src="assets/forest/forest-far.webp" alt="" loading="lazy">
+        <img class="layer l-forest-mid" src="assets/forest/forest-mid.webp" alt="" loading="lazy">
+        <div class="hero hero--forest">
+          <img class="pose" src="assets/hero/hero-away-a.webp" alt="" loading="lazy">
+          <img class="pose" src="assets/hero/hero-away-b.webp" alt="" loading="lazy">
+        </div>
+        <img class="layer l-forest-front-left" src="assets/forest/forest-front-left.webp" alt="" loading="lazy">
+        <img class="layer l-forest-front-right" src="assets/forest/forest-front-right.webp" alt="" loading="lazy">
       </div>
-      <div class="layer l-forest-front-left" data-asset="forest-front-left"></div>
-      <div class="layer l-forest-front-right" data-asset="forest-front-right"></div>
       <p class="caption">Тропа уводит всё глубже.</p>
     </section>
 
     <!-- 5. Склон: цвет неба по скроллу, диагональ -->
     <section class="scene s-slope" id="slope" data-length="200" aria-label="Склон">
-      <div class="layer l-slope-sky" data-asset="slope-sky"></div>
-      <div class="layer l-slope-hill" data-asset="slope-hill"></div>
-      <div class="hero hero--slope">
-        <div class="pose" data-pose="hero-climb-a"></div>
-        <div class="pose" data-pose="hero-climb-b"></div>
+      <div class="sky sky--slope"></div>
+      <div class="frame">
+        <img class="layer l-slope-hill" src="assets/slope/slope-hill.webp" alt="" loading="lazy">
+        <div class="hero hero--slope">
+          <img class="pose" src="assets/hero/hero-climb-a.webp" alt="" loading="lazy">
+          <img class="pose" src="assets/hero/hero-climb-b.webp" alt="" loading="lazy">
+        </div>
       </div>
-      <div class="layer l-slope-grass" data-asset="slope-grass"></div>
       <p class="caption">Небо начинает светлеть.</p>
     </section>
 
     <!-- 6. Рассвет: солнце, свет, отъезд и крупный план -->
     <section class="scene s-dawn" id="dawn" data-length="250" aria-label="Рассвет">
-      <div class="camera">
-        <div class="layer l-dawn-sky" data-asset="dawn-sky"></div>
-        <div class="sun" data-asset="dawn-sun"></div>
-        <div class="layer l-dawn-hills" data-asset="dawn-hills"></div>
-        <div class="layer l-dawn-summit" data-asset="dawn-summit"></div>
-        <div class="hero hero--dawn">
-          <div class="pose" data-pose="hero-summit"></div>
+      <div class="frame">
+        <div class="camera">
+          <div class="sky sky--dawn"></div>
+          <div class="sun"></div>
+          <img class="layer" src="assets/dawn/dawn-hills.webp" alt="" loading="lazy">
+          <img class="layer" src="assets/dawn/dawn-summit.webp" alt="" loading="lazy">
+          <div class="hero hero--dawn">
+            <img class="pose" src="assets/hero/hero-summit.webp" alt="" loading="lazy">
+          </div>
         </div>
       </div>
       <div class="light"></div>
-      <div class="closeup" data-asset="hero-face-closeup"><div class="face"></div></div>
+      <div class="closeup">
+        <img src="assets/hero/hero-face-closeup.webp" alt="Лицо героя в свете рассвета" loading="lazy">
+      </div>
       <p class="caption">И тогда встаёт солнце.</p>
     </section>
 
@@ -115,6 +137,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js" defer></script>
-  <script src="js/main.js" defer></script>
+  <script src="js/main.js?v=3" defer></script>
 </body>
 </html>
