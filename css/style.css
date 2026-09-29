@@ -1,0 +1,25 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #f4efe6;
+  color: #2b2621;
+}
+
+.intro {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.intro h1 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(2.5rem, 8vw, 5rem);
+}
