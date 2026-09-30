@@ -310,6 +310,7 @@
       tl.to(title, { y: -80, autoAlpha: 0, duration: 0.1 }, 0.4);
       tl.to(q('.proscenium'), { scale: 2.8, autoAlpha: 0, duration: 0.3, ease: 'power2.in' }, 0.45);
       tl.to(q('.camera'), { scale: 8, duration: 0.5, ease: 'power2.in' }, 0.48);
+      caption(tl, q('.caption'), 0.46, 0.8);
     });
     // Состояние «занавес закрыт» теперь держит таймлайн — класс из <head> больше не нужен.
     document.documentElement.classList.remove('intro');

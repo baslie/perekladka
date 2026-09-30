@@ -251,7 +251,8 @@ img {
 
 .caption > span {
   display: inline-block;
-  max-width: 36rem;
+  max-width: 46rem;
+  text-wrap: balance;
   padding: 0.3em 1.1em 0.4em;
   background: var(--paper) var(--noise);
   background-blend-mode: multiply;
@@ -947,7 +948,8 @@ img {
   font-style: italic;
   font-weight: 500;
   font-size: clamp(1.1rem, 2.3vw, 2.2rem);
-  white-space: nowrap;
+  width: max-content;
+  max-width: 12em;
   box-shadow: 0 0.5vh 1vh rgba(0, 0, 0, 0.4);
   opacity: 0;
 }
@@ -1088,6 +1090,7 @@ img {
   font-style: italic;
   font-weight: 500;
   text-align: right;
+  text-wrap: balance;
 }
 
 .bill__note {
