@@ -273,12 +273,15 @@ img {
   display: inline-block;
 }
 
-/* ─── ремарка: машинописная строка «Лист II · Улица · 03:40» ────── */
+/* ─── ремарка: машинописная строка «Улица · 03:47» ────── */
 
+/* Одна на всю пьесу, закреплена поверх сцен, как часы; текст ведёт main.js. */
 .remark {
-  position: absolute;
+  position: fixed;
   left: max(16px, 3vw);
-  top: max(14px, 3.2%);
+  top: max(14px, 3vh);
+  z-index: 30;
+  display: none;
   margin: 0;
   padding: 0.45em 0.8em 0.4em 0.7em;
   border-left: 3px solid var(--accent);
@@ -291,11 +294,16 @@ img {
   text-transform: uppercase;
   white-space: nowrap;
   box-shadow: 0 0.5vh 1vh rgba(0, 0, 0, 0.35);
-  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
 }
 
-.s-window .remark {
-  opacity: 1;
+.motion .remark {
+  display: block;
+}
+
+.remark.is-off {
+  opacity: 0;
 }
 
 /* ─── герой: стопка поз, видна одна ─────────────────────────────── */
@@ -1550,7 +1558,6 @@ img {
 /* Без движения: сцены стоят статичными кадрами, подписи видны сразу */
 @media (prefers-reduced-motion: reduce) {
   .caption,
-  .remark,
   .tag {
     opacity: 1;
   }

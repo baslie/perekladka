@@ -1,5 +1,5 @@
 // «Рассвет»: восемь сцен, прокрутка управляет таймлайнами. Раскадровка — docs/storyboard.md.
-// Оформление — театральная программка: занавес на входе, ремарки «Лист II · Улица · 03:40»,
+// Оформление — театральная программка: занавес на входе, ремарка «Улица · 03:47» поверх сцен,
 // часы до рассвета в углу, программка и билет в финале.
 //
 // Каждая сцена закрепляется (pin) на длину из data-length (в процентах высоты экрана)
@@ -15,7 +15,7 @@
 // ?debug в адресе — маркеры ScrollTrigger и счётчик «сцена / прогресс».
 
 (() => {
-  // Буквы заголовка и ремарки режем до проверки GSAP: наклон букв задан в CSS и нужен и статичной странице.
+  // Буквы заголовка режем до проверки GSAP: наклон букв задан в CSS и нужен и статичной странице.
   /** Разрезать текст элемента на span-ы по символам (для экранного диктора текст остаётся в aria-label). */
   function cutChars(el, cls) {
     const text = el.textContent;
@@ -23,7 +23,6 @@
     el.innerHTML = [...text].map((ch) => `<span class="${cls}" aria-hidden="true">${ch}</span>`).join('');
   }
   document.querySelectorAll('.title h1').forEach((el) => cutChars(el, 'ch'));
-  document.querySelectorAll('.remark').forEach((el) => cutChars(el, 'c'));
 
   if (!window.gsap || !window.ScrollTrigger) return; // CDN не загрузился — страница остаётся статичной
 
@@ -127,7 +126,9 @@
         onToggle: () => update(),
         onUpdate: (st) => {
           nav.progress(id, Math.min(st.progress * end, 1));
-          clock.set(id, Math.min(st.progress * end, 1));
+          // Только активная сцена: при быстрой прокрутке вверх сцены ниже тоже зовут onUpdate
+          // (прогресс сбрасывается в 0) — последней отметилась бы нижняя, и часы ушли бы вперёд.
+          if (st.isActive) clock.set(id, Math.min(st.progress * end, 1));
           if (DEBUG) hud.textContent = `${id} ${(st.progress * end * 100).toFixed(0)}%`;
         },
       },
@@ -177,13 +178,6 @@
     tl.to(el, { autoAlpha: 0, y: -24, duration: 0.07 }, outAt);
   }
 
-  /** Ремарка печатается по буквам в начале сцены и гаснет к её концу. */
-  function remark(tl, el, inAt, outAt) {
-    tl.set(el, { autoAlpha: 1 }, inAt);
-    tl.fromTo(el.querySelectorAll('.c'), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.001, stagger: 0.004 }, inAt);
-    tl.to(el, { autoAlpha: 0, duration: 0.05 }, outAt);
-  }
-
   // ─── часы до рассвета ───────────────────────────────────────────
 
   // Время сцены — data-time="03:40-04:05" на секции; data-time-until — доля сцены, к которой
@@ -193,6 +187,12 @@
     const time = root.querySelector('.clock__time');
     const left = root.querySelector('.clock__left');
     const hour = root.querySelector('.clock__h');
+    // Ремарка идёт вместе с часами: название сцены берём из навигации.
+    const remark = document.querySelector('.remark');
+    const names = new Map([...document.querySelectorAll('.scenes a')].map((a) => [
+      a.hash.slice(1),
+      a.querySelector('.scenes__label').textContent,
+    ]));
     const minute = root.querySelector('.clock__m');
     const toMin = (hhmm) => {
       const [h, m] = hhmm.split(':').map(Number);
@@ -206,11 +206,13 @@
     });
 
     let shown = '';
-    function show(m, note) {
-      const key = `${m} ${note}`;
+    function show(id, m, note) {
+      const key = `${id} ${m} ${note}`;
       if (key === shown) return; // onUpdate зовётся на каждый кадр — трогаем DOM, только когда минута сменилась
       shown = key;
-      time.textContent = `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+      const hhmm = `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+      time.textContent = hhmm;
+      remark.textContent = `${names.get(id)} · ${spans.has(id) ? hhmm : note}`;
       left.textContent = note;
       hour.style.transform = `rotate(${((m / 60) % 12) * 30}deg)`;
       minute.style.transform = `rotate(${(m % 60) * 6}deg)`;
@@ -224,16 +226,17 @@
     }
 
     const first = spans.get('window').from;
-    show(first, countdown(first));
+    show('window', first, countdown(first));
     return {
       set(id, p) {
         const span = spans.get(id);
-        if (!span) return show(DAWN, 'антракт');
+        if (!span) return show(id, DAWN, 'антракт');
         const m = Math.round(span.from + (span.to - span.from) * Math.min(p / span.until, 1));
-        return show(m, countdown(m));
+        return show(id, m, countdown(m));
       },
       hide(state) {
         root.classList.toggle('is-off', state);
+        remark.classList.toggle('is-off', state);
       },
     };
   })();
@@ -303,9 +306,8 @@
         { autoAlpha: 0, y: () => -window.innerHeight * 0.45, rotation: () => gsap.utils.random(-35, 35) },
         { autoAlpha: 1, y: 0, rotation: 0, duration: 0.08, stagger: 0.012, ease: 'back.out(1.5)' }, 0.13);
       tl.fromTo(title.querySelectorAll('.title__sub, .title__cue'), { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.05, stagger: 0.02 }, 0.23);
-      // 0.3–0.4 афиша стоит, потом уходит вместе с ремаркой
+      // 0.3–0.4 афиша стоит, потом уходит
       tl.to(title, { y: -80, autoAlpha: 0, duration: 0.1 }, 0.4);
-      tl.to(q('.remark'), { y: -20, autoAlpha: 0, duration: 0.08 }, 0.4);
       tl.to(q('.proscenium'), { scale: 2.8, autoAlpha: 0, duration: 0.3, ease: 'power2.in' }, 0.45);
       tl.to(q('.camera'), { scale: 8, duration: 0.5, ease: 'power2.in' }, 0.48);
     });
@@ -336,7 +338,6 @@
           gsap.set(hero, { scaleX: facing });
         },
       });
-      remark(tl, q('.remark'), 0.01, 0.92);
       caption(tl, q('.caption'), 0.05, 0.8);
     });
 
@@ -348,7 +349,6 @@
       showPose(tl, hero, 2, 0.65);
       showPose(tl, hero, 3, 0.8);
       tl.to(hero, { rotation: 2.5, duration: 0.03, repeat: 5, yoyo: true, ease: 'sine.inOut' }, 0.82);
-      remark(tl, q('.remark'), 0.01, 0.92);
       caption(tl, q('.caption'), 0.35, 0.9);
     });
 
@@ -362,7 +362,6 @@
       const hero = q('.hero');
       tl.to(hero, { scale: 0.45, y: '-30vh', duration: 1 }, 0);
       for (let i = 0; i < 10; i++) showPose(tl, hero, i % 2, i / 10, STEP);
-      remark(tl, q('.remark'), 0.01, 0.92);
       caption(tl, q('.caption'), 0.05, 0.75);
     });
 
@@ -374,7 +373,6 @@
       const hero = q('.hero');
       tl.to(hero, { x: '55vw', y: '-38vh', scale: 0.8, duration: 1 }, 0);
       for (let i = 0; i < 8; i++) showPose(tl, hero, i % 2, i / 8, STEP);
-      remark(tl, q('.remark'), 0.01, 0.92);
       caption(tl, q('.caption'), 0.1, 0.85);
     });
 
@@ -383,7 +381,6 @@
       tl.fromTo(q('.sun'), { y: '33vh' }, { y: '-3vh', duration: 0.55, ease: 'power1.out' }, 0);
       tl.to(q('.light'), { opacity: 0.6, duration: 0.4 }, 0);
       tl.fromTo(q('.camera'), { scale: 1.4 }, { scale: 1, duration: 0.4, ease: 'power1.inOut' }, 0.2);
-      remark(tl, q('.remark'), 0.01, 0.7);
       caption(tl, q('.caption'), 0.1, 0.6);
       tl.fromTo(q('.closeup'), { autoAlpha: 0, scale: 1.08 }, { autoAlpha: 1, scale: 1, duration: 0.12 }, 0.75);
     });
@@ -416,7 +413,6 @@
       for (const sel of Object.keys(depth)) {
         tl.to(q(sel), { z: 0, duration: 0.2, ease: 'power2.inOut' }, 0.78);
       }
-      remark(tl, q('.remark'), 0.01, 0.92);
       caption(tl, q('.caption'), 0.02, 0.3);
     });
 
