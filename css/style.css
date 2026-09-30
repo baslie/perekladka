@@ -104,6 +104,9 @@
   --frame-h: max(var(--vh), 56.25vw);
   /* Вырезанный край и тень — фотоколлаж, а не фотомонтаж. */
   --cut: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.75)) drop-shadow(0 1.2vh 1.4vh rgba(0, 0, 0, 0.45));
+  /* Бархату — только тень: белая кромка вырезки на кулисе растягивается вместе со scaleX
+     закрытого занавеса и светится полосой по шву. */
+  --cut-velvet: drop-shadow(0 1.2vh 1.4vh rgba(0, 0, 0, 0.45));
   /* Рваный верхний край листа. */
   --torn: polygon(0 7px, 4% 2px, 9% 8px, 13% 3px, 19% 6px, 24% 1px, 30% 7px, 35% 3px, 41% 8px, 47% 2px, 52% 6px, 58% 1px, 63% 7px, 69% 3px, 74% 8px, 80% 2px, 85% 6px, 91% 1px, 96% 7px, 100% 3px, 100% 100%, 0 100%);
   /* Белая сердцевина разрыва: чуть выше и мельче --torn, выглядывает из-под краски листа. */
@@ -456,7 +459,7 @@ img {
   top: 0;
   bottom: 0;
   width: var(--curtain);
-  filter: var(--cut);
+  filter: var(--cut-velvet);
 }
 
 .curtain--l {
@@ -508,7 +511,7 @@ img {
   right: 0;
   top: 0;
   height: 13vh;
-  filter: var(--cut);
+  filter: var(--cut-velvet);
 }
 
 .valance i {
