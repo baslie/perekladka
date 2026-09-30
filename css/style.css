@@ -266,7 +266,6 @@ img {
 
 /* Реплика героя — в кавычках, как цитата в программке (кавычки ставит main.js). */
 .caption .q {
-  color: var(--accent);
   font-style: inherit;
 }
 
