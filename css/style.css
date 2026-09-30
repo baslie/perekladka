@@ -48,6 +48,40 @@
   src: url("../assets/fonts/cormorant-latin-500-italic.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
+/* Капитель программки: шапки, номера актов. */
+@font-face {
+  font-family: "Cormorant SC";
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url("../assets/fonts/cormorant-sc-cyrillic-600-normal.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Cormorant SC";
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url("../assets/fonts/cormorant-sc-latin-600-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* Машинопись ремарок и часов. */
+@font-face {
+  font-family: "PT Mono";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("../assets/fonts/pt-mono-cyrillic-400-normal.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "PT Mono";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("../assets/fonts/pt-mono-latin-400-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 :root {
   --night: #0e1428;
@@ -55,7 +89,14 @@
   --ink: #2b2621;
   --accent: #b5452b;
   --sun: #ffd98a;
+  --velvet: #5e1a17;
+  --brass: #c9a55a;
+  --ticket: #efe3c8;
   --serif: "Cormorant", Georgia, "Times New Roman", serif;
+  --sc: "Cormorant SC", var(--serif);
+  --mono: "PT Mono", ui-monospace, "Courier New", monospace;
+  /* Шум бумаги: зерно поверх страницы и фактура полосок-подписей. */
+  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.45 0 0 0 0 0.4 0 0 0 1.1 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   /* Высота экрана: svh не прыгает, когда на телефоне прячется адресная строка. */
   --vh: 100vh;
   /* Кадр 16:9, накрывающий экран: те же пропорции, что у генераций. */
@@ -65,6 +106,8 @@
   --cut: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.75)) drop-shadow(0 1.2vh 1.4vh rgba(0, 0, 0, 0.45));
   /* Рваный верхний край листа. */
   --torn: polygon(0 7px, 4% 2px, 9% 8px, 13% 3px, 19% 6px, 24% 1px, 30% 7px, 35% 3px, 41% 8px, 47% 2px, 52% 6px, 58% 1px, 63% 7px, 69% 3px, 74% 8px, 80% 2px, 85% 6px, 91% 1px, 96% 7px, 100% 3px, 100% 100%, 0 100%);
+  /* Белая сердцевина разрыва: чуть выше и мельче --torn, выглядывает из-под краски листа. */
+  --torn-core: polygon(0 3px, 2% 1px, 4% 0, 7% 4px, 9% 5px, 11% 2px, 13% 0, 16% 2px, 19% 3px, 22% 1px, 24% 0, 27% 3px, 30% 4px, 33% 1px, 35% 0, 38% 3px, 41% 5px, 44% 2px, 47% 0, 50% 2px, 52% 3px, 55% 1px, 58% 0, 61% 3px, 63% 4px, 66% 1px, 69% 0, 72% 2px, 74% 5px, 77% 2px, 80% 0, 83% 1px, 85% 3px, 88% 1px, 91% 0, 94% 3px, 96% 4px, 98% 1px, 100% 0, 100% 100%, 0 100%);
 }
 
 @supports (height: 100svh) {
@@ -112,7 +155,18 @@ img {
 .sheet {
   position: absolute;
   inset: 0;
+  z-index: 0; /* свой контекст наложения: сердцевина разрыва (z-index: -1) остаётся под .paper */
   transform-origin: 0% 0%;
+}
+
+.scene:not(#window) .sheet::after,
+.s-final .sheet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: #e9e1d2;
+  clip-path: var(--torn-core);
 }
 
 /* Тень, которую лист отбрасывает на предыдущую сцену. */
@@ -196,7 +250,8 @@ img {
   display: inline-block;
   max-width: 36rem;
   padding: 0.3em 1.1em 0.4em;
-  background: var(--paper);
+  background: var(--paper) var(--noise);
+  background-blend-mode: multiply;
   color: var(--ink);
   font-style: italic;
   font-weight: 500;
@@ -206,8 +261,39 @@ img {
   clip-path: polygon(1.5% 4%, 30% 0, 62% 5%, 100% 1%, 98.5% 30%, 100% 62%, 98% 100%, 66% 95%, 34% 100%, 0 96%, 1.2% 64%, 0 33%);
 }
 
+/* Реплика героя — в кавычках, как цитата в программке (кавычки ставит main.js). */
+.caption .q {
+  color: var(--accent);
+  font-style: inherit;
+}
+
 .caption .w {
   display: inline-block;
+}
+
+/* ─── ремарка: машинописная строка «Лист II · Улица · 03:40» ────── */
+
+.remark {
+  position: absolute;
+  left: max(16px, 3vw);
+  top: max(14px, 3.2%);
+  margin: 0;
+  padding: 0.45em 0.8em 0.4em 0.7em;
+  border-left: 3px solid var(--accent);
+  background: var(--paper) var(--noise);
+  background-blend-mode: multiply;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: clamp(0.7rem, 0.95vw, 0.85rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 0.5vh 1vh rgba(0, 0, 0, 0.35);
+  opacity: 0;
+}
+
+.s-window .remark {
+  opacity: 1;
 }
 
 /* ─── герой: стопка поз, видна одна ─────────────────────────────── */
@@ -281,7 +367,7 @@ img {
 .grain::before {
   opacity: 0.16;
   mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.45 0 0 0 0 0.4 0 0 0 1.1 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: var(--noise);
 }
 
 .stars {
@@ -355,28 +441,205 @@ img {
   --grade: brightness(0.82) saturate(0.85);
 }
 
+/* Портал бумажного театра. Каждая часть — вырезка: фильтр --cut на обёртке,
+   форма (clip-path, mask) на вложенном <i>, иначе тень срезалась бы вместе с формой. */
+.proscenium {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform-origin: 50% 45%;
+  --curtain: 13vw;
+}
+
+.curtain {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--curtain);
+  filter: var(--cut);
+}
+
+.curtain--l {
+  left: 0;
+  transform-origin: 0 50%;
+}
+
+.curtain--r {
+  right: 0;
+  transform-origin: 100% 50%;
+}
+
+.curtain i {
+  position: absolute;
+  inset: 0;
+  /* Складки бархата, тень у внутреннего края и потемнение сверху и снизу. */
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.45), transparent 22%, transparent 78%, rgba(0, 0, 0, 0.5)),
+    linear-gradient(90deg, transparent 55%, rgba(0, 0, 0, 0.35)),
+    repeating-linear-gradient(90deg, #3d0f0d 0, #6e211c 1.1vw, #8a2e25 1.6vw, var(--velvet) 2.5vw, #3d0f0d 3.3vw);
+  /* Внутренний край почти прямой, с лёгкой волной: закрытые кулисы сходятся ровным швом. */
+  clip-path: polygon(0 0, 100% 0, 97% 38%, 100% 68%, 98% 100%, 0 100%);
+}
+
+.curtain--r i {
+  transform: scaleX(-1);
+}
+
+/* Подхват: латунная лента на двух третях высоты. Появляется, когда занавес раскрыт. */
+.curtain b {
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  top: 63%;
+  height: 1.3vh;
+  border-radius: 0.6vh;
+  background: linear-gradient(#e6c987, var(--brass) 45%, #8a6a2c);
+  box-shadow: 0 0.4vh 0.8vh rgba(0, 0, 0, 0.45);
+  rotate: -4deg;
+}
+
+.curtain--r b {
+  rotate: 4deg;
+}
+
+.valance {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 13vh;
+  filter: var(--cut);
+}
+
+.valance i {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(transparent calc(100% - 4.4vh), var(--brass) calc(100% - 4.4vh) calc(100% - 3.8vh), transparent calc(100% - 3.8vh)),
+    linear-gradient(rgba(0, 0, 0, 0.4), transparent 70%),
+    repeating-linear-gradient(90deg, #4a1412 0, #7a2620 1.6vw, var(--velvet) 3.2vw);
+  /* Фестоны: полоса ткани плюс ряд полукругов снизу. */
+  mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - 3.5vh) no-repeat,
+    radial-gradient(circle 3.5vh at 50% 0, #000 97%, transparent) bottom / 7vh 3.5vh repeat-x;
+}
+
+/* Рампа: латунный кант, ряд лампочек и тёплый свет вверх по сцене. */
+.footlights {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2.6vh;
+  background:
+    radial-gradient(circle at 50% 35%, #fff3cf 0 0.35vh, rgba(255, 210, 140, 0.55) 0.6vh, transparent 1.2vh) 0 0 / 5vh 100% repeat-x,
+    linear-gradient(var(--brass) 0 2px, #140e0b 2px);
+}
+
+.footlights::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 24vh;
+  background: linear-gradient(to top, rgba(255, 200, 130, 0.2), transparent);
+}
+
+/* Пока .intro (ставит скрипт в <head>), занавес закрыт и афиша пуста — до того, как
+   таймлайн сцены возьмёт это состояние на себя. 4.1: кулиса 13vw растягивается чуть дальше
+   середины экрана (с запасом на волну края). */
+.intro .curtain {
+  transform: scaleX(4.1);
+}
+
+.intro .curtain b,
+.intro .title > * {
+  opacity: 0;
+}
+
+/* Подсказка на закрытом занавесе — только когда прокрутка его раскрывает. */
+.curtain-cue {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: 14%;
+  margin: 0;
+  padding: 0.3em 1em 0.4em;
+  translate: -50% 0;
+  background: var(--paper) var(--noise);
+  background-blend-mode: multiply;
+  color: var(--ink);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1.1rem, 1.8vw, 1.45rem);
+  white-space: nowrap;
+  rotate: -1.5deg;
+  box-shadow: 0 0.6vh 1.2vh rgba(0, 0, 0, 0.45);
+}
+
+.curtain-cue::after {
+  content: " ↓";
+}
+
+.intro .curtain-cue,
+.motion .curtain-cue {
+  display: block;
+}
+
+/* Афиша */
 .title {
   position: absolute;
-  right: 6vw;
-  bottom: 9%;
+  right: calc(13vw + 3vw);
+  bottom: 10%;
   text-align: right;
+}
+
+.title__kicker {
+  margin: 0 0 0.4rem;
+  color: var(--sun);
+  font-family: var(--sc);
+  font-weight: 600;
+  font-size: clamp(0.8rem, 1.15vw, 1.05rem);
+  letter-spacing: 0.22em;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
 }
 
 .title h1 {
   margin: 0;
   /* В альбомном телефоне 15vw выше трети экрана — ограничиваем и по высоте. */
-  font-size: clamp(3.5rem, min(15vw, calc(var(--vh) * 0.26)), 10.5rem);
+  font-size: clamp(3.5rem, min(14vw, calc(var(--vh) * 0.25)), 10rem);
   font-weight: 600;
   line-height: 0.9;
   letter-spacing: -0.01em;
   filter: var(--cut);
 }
 
-.title p {
+/* Каждая буква — отдельная вырезка, наклеена чуть криво. */
+.title .ch {
+  display: inline-block;
+  rotate: -1.5deg;
+}
+
+.title .ch:nth-child(2n) { rotate: 1.8deg; translate: 0 0.03em; }
+.title .ch:nth-child(3n) { rotate: -2.6deg; }
+.title .ch:nth-child(5n) { rotate: 2.4deg; translate: 0 -0.02em; }
+
+.title__sub {
+  margin: 0.7rem 0 0;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1.05rem, 1.6vw, 1.4rem);
+  line-height: 1.3;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.75);
+}
+
+.title__cue {
   display: inline-block;
   margin: 1rem 0 0;
   padding: 0.2em 0.8em 0.3em;
-  background: var(--paper);
+  background: var(--paper) var(--noise);
+  background-blend-mode: multiply;
   color: var(--ink);
   font-style: italic;
   font-weight: 500;
@@ -384,7 +647,7 @@ img {
   rotate: 1.5deg;
 }
 
-.title p::after {
+.title__cue::after {
   content: " ↓";
 }
 
@@ -679,6 +942,28 @@ img {
   opacity: 0;
 }
 
+/* Номер из программки */
+.tag b {
+  margin-right: 0.6em;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 0.6em;
+  letter-spacing: 0.08em;
+  vertical-align: 0.2em;
+}
+
+/* Подвес: латунный пруток уходит вверх к колосникам — табличка висит, как декорация. */
+.tag::before {
+  content: "";
+  position: absolute;
+  left: 1.2em;
+  bottom: 100%;
+  width: 2px;
+  height: 45vh;
+  background: linear-gradient(transparent, var(--brass) 60%);
+}
+
 .plate--sky .tag { left: 8%; top: 7%; rotate: -2deg; }
 .plate--sun .tag { left: 61%; top: 17%; rotate: 1.5deg; }
 .plate--hills .tag { left: 66%; top: 46%; rotate: -1deg; }
@@ -700,47 +985,208 @@ img {
 
 .s-final .paper {
   display: grid;
-  place-content: center;
-  gap: 0.25rem;
-  padding: 2rem 16px;
-  text-align: center;
+  place-items: center;
+  padding: 3.5rem 16px 4.5rem;
   background: var(--paper);
   color: var(--ink);
 }
 
-.s-final h2 {
+/* Программка: двойная рамка, всё по центру. */
+.bill {
+  position: relative;
+  width: min(100%, 36rem);
+  padding: 2.2rem clamp(1.1rem, 4vw, 2.6rem) 2.4rem;
+  border: 1px solid rgba(43, 38, 33, 0.55);
+  outline: 1px solid rgba(43, 38, 33, 0.55);
+  outline-offset: 5px;
+  text-align: center;
+}
+
+.bill__kicker,
+.bill__head {
+  display: flex;
+  align-items: center;
+  gap: 0.9em;
   margin: 0;
-  font-size: clamp(3.5rem, 11vw, 7rem);
+  font-family: var(--sc);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.26em;
+}
+
+.bill__kicker::before,
+.bill__kicker::after,
+.bill__head::before,
+.bill__head::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid currentColor;
+  opacity: 0.45;
+}
+
+.s-final h2 {
+  margin: 0.4rem 0 0;
+  font-size: clamp(3.5rem, 11vw, 6.5rem);
   font-weight: 600;
   line-height: 1;
 }
 
-.s-final p {
-  max-width: 34rem;
-  margin: 0.75rem auto 0;
-  font-size: 1.35rem;
+.bill__lead {
+  margin: 0.6rem 0 1.8rem;
+  text-wrap: balance;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.25rem;
+  line-height: 1.35;
+}
+
+.bill__head {
+  color: var(--accent);
+}
+
+/* «В ролях»: роль — отточие — описание. */
+.cast {
+  margin: 0.9rem 0 0;
+  font-size: clamp(1.05rem, 4.4vw, 1.25rem);
+  text-align: left;
+}
+
+.cast div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4em;
+  margin-top: 0.2rem;
+}
+
+.cast div::before {
+  content: "";
+  order: 1;
+  flex: 1;
+  min-width: 1.5em;
+  border-bottom: 2px dotted rgba(43, 38, 33, 0.4);
+}
+
+.cast dt {
+  font-family: var(--sc);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.cast dd {
+  order: 2;
+  margin: 0;
+  font-style: italic;
+  font-weight: 500;
+  text-align: right;
+}
+
+.bill__note {
+  max-width: 28rem;
+  margin: 1.8rem auto 0;
+  font-size: 1.3rem;
   line-height: 1.45;
 }
 
-.s-final a {
-  display: inline-block;
-  margin-top: 0.5rem;
-  padding: 0.2em 0.9em 0.3em;
-  background: var(--accent);
-  color: var(--paper);
-  font-style: italic;
-  font-weight: 500;
-  text-decoration: none;
-  rotate: -1.5deg;
-  transition: rotate 0.2s;
+/* Билет с корешком: перфорация пунктиром, по её краям — полукруглые вырезы. */
+.ticket {
+  position: relative;
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  margin: 2rem auto 0;
+  background: var(--ticket) var(--noise);
+  background-blend-mode: multiply;
+  box-shadow: 0 0.6vh 1.4vh rgba(43, 38, 33, 0.25);
+  rotate: -2deg;
+  transition: rotate 0.25s;
 }
 
-.s-final a:hover,
-.s-final a:focus-visible {
+.ticket:hover,
+.ticket:focus-within {
   rotate: 0deg;
 }
 
-/* ─── навигация по сценам ───────────────────────────────────────── */
+.ticket__stub {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0.8rem 0.9rem;
+  border-left: 2px dashed rgba(43, 38, 33, 0.45);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  rotate: 180deg;
+}
+
+.ticket__stub::before,
+.ticket__stub::after {
+  content: "";
+  position: absolute;
+  left: -9px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--paper);
+}
+
+/* Корешок повёрнут на 180°: его «лево» — это линия перфорации. */
+.ticket__stub::before { top: -8px; }
+.ticket__stub::after { bottom: -8px; }
+
+.ticket__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem 1.2rem;
+  padding: 1rem 1.3rem;
+}
+
+.ticket a {
+  color: var(--ink);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.25rem;
+  text-decoration: none;
+}
+
+.ticket a:first-child {
+  padding: 0.15em 0.8em 0.25em;
+  background: var(--accent);
+  color: var(--paper);
+}
+
+.ticket__again {
+  border-bottom: 1px solid rgba(43, 38, 33, 0.5);
+}
+
+.ticket a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Штамп: красная мастика по бумаге, криво, как ставят в кассе. */
+.stamp {
+  position: absolute;
+  top: 1.1rem;
+  right: 0.6rem;
+  margin: 0;
+  padding: 0.35em 0.7em 0.4em;
+  border: 3px double rgba(181, 69, 43, 0.85);
+  color: rgba(181, 69, 43, 0.85);
+  font-family: var(--sc);
+  font-weight: 600;
+  font-size: 0.85rem;
+  line-height: 1.15;
+  letter-spacing: 0.18em;
+  rotate: -14deg;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* ─── навигация: номера актов ───────────────────────────────────── */
 
 .scenes {
   position: fixed;
@@ -753,7 +1199,7 @@ img {
 .scenes ol {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -761,10 +1207,9 @@ img {
 
 .scenes a {
   position: relative;
-  display: block;
-  width: 4px;
-  height: 30px;
-  background: rgba(244, 239, 230, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 9px;
   color: var(--paper);
   text-decoration: none;
 }
@@ -773,20 +1218,47 @@ img {
 .scenes a::before {
   content: "";
   position: absolute;
-  inset: -5px -12px;
+  inset: -4px -12px -4px -6px;
+}
+
+.scenes__num {
+  min-width: 2.2em;
+  font-family: var(--sc);
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-align: right;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.scenes a:hover .scenes__num,
+.scenes a:focus-visible .scenes__num,
+.scenes a.is-active .scenes__num {
+  color: var(--c);
+  opacity: 1;
+}
+
+.scenes__bar {
+  position: relative;
+  width: 3px;
+  height: 28px;
+  overflow: hidden;
+  background: rgba(244, 239, 230, 0.22);
 }
 
 .scenes__fill {
   position: absolute;
   inset: 0;
-  background: var(--sun);
+  background: var(--c, var(--sun));
   transform: scaleY(0);
   transform-origin: 50% 0;
 }
 
 .scenes__label {
   position: absolute;
-  right: 16px;
+  right: calc(100% + 10px);
   top: 50%;
   translate: 0 -50%;
   padding: 0.1em 0.6em 0.2em;
@@ -817,6 +1289,112 @@ img {
   outline-offset: 4px;
 }
 
+/* На светлой бумаге финала — чернила вместо бумаги. */
+.scenes.is-light a {
+  color: var(--ink);
+}
+
+.scenes.is-light .scenes__num {
+  text-shadow: none;
+}
+
+.scenes.is-light a.is-active .scenes__num,
+.scenes.is-light a:hover .scenes__num {
+  color: var(--accent);
+}
+
+.scenes.is-light .scenes__bar {
+  background: rgba(43, 38, 33, 0.2);
+}
+
+/* ─── часы до рассвета ──────────────────────────────────────────── */
+
+.clock {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 30;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+
+.motion .clock {
+  display: flex;
+}
+
+.clock.is-off {
+  opacity: 0;
+}
+
+/* Циферблат: бумажный круг, 12 рисок, стрелки поворачивает main.js. */
+.clock__face {
+  position: relative;
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--paper) 58%, transparent 60%),
+    repeating-conic-gradient(from -1.5deg, var(--ink) 0 3deg, var(--paper) 3deg 30deg);
+  box-shadow: 0 0 0 2px var(--brass), 0 0.6vh 1.2vh rgba(0, 0, 0, 0.45);
+}
+
+.clock__face i {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  transform-origin: 50% 100%;
+}
+
+.clock__h {
+  height: 28%;
+  background: var(--ink);
+}
+
+.clock__m {
+  height: 40%;
+  background: var(--accent);
+}
+
+.clock__face::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.clock__text {
+  display: flex;
+  flex-direction: column;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+}
+
+.clock__time {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+}
+
+.clock__left {
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1rem;
+  color: var(--sun);
+}
+
 /* ─── служебное ─────────────────────────────────────────────────── */
 
 .hud {
@@ -844,7 +1422,7 @@ img {
   }
 
   .title {
-    right: 16px;
+    right: calc(13vw + 10px);
     left: 16px;
     bottom: 11%;
   }
@@ -870,6 +1448,11 @@ img {
     font-size: 0.9rem;
   }
 
+  /* Таблички в портрете стоят столбиком — прутки перечёркивали бы соседние. */
+  .tag::before {
+    display: none;
+  }
+
   .plate--sky .tag { left: 4%; top: 4%; }
   .plate--sun .tag { left: auto; right: 2%; top: 13%; }
   .plate--hills .tag { left: auto; right: 2%; top: 44%; }
@@ -888,16 +1471,27 @@ img {
 
   .scenes ol {
     flex-direction: row;
-    gap: 8px;
+    gap: 6px;
   }
 
   .scenes a {
-    width: 26px;
-    height: 4px;
+    flex-direction: column;
+    gap: 3px;
   }
 
   .scenes a::before {
-    inset: -14px -4px;
+    inset: -8px -3px -12px;
+  }
+
+  .scenes__num {
+    min-width: 0;
+    font-size: 0.72rem;
+    text-align: center;
+  }
+
+  .scenes__bar {
+    width: 30px;
+    height: 3px;
   }
 
   .scenes__fill {
@@ -909,18 +1503,52 @@ img {
     right: auto;
     left: 50%;
     top: auto;
-    bottom: 14px;
+    bottom: calc(100% + 8px);
     translate: -50% 0;
+  }
+
+  /* Часы уходят в правый верхний угол, без строки отсчёта: слева там ремарка. */
+  .clock {
+    left: auto;
+    right: 12px;
+    top: 12px;
+    bottom: auto;
+    gap: 7px;
+  }
+
+  .clock__face {
+    width: 34px;
+    height: 34px;
+  }
+
+  .clock__left {
+    display: none;
+  }
+
+  .clock__time {
+    font-size: 0.95rem;
   }
 
   .caption {
     top: 9%;
+  }
+
+  .remark {
+    letter-spacing: 0.06em;
+  }
+
+  /* Штамп уходит на угол рамки, чтобы не лечь на «Программку». */
+  .stamp {
+    top: -1.1rem;
+    right: -0.5rem;
+    font-size: 0.72rem;
   }
 }
 
 /* Без движения: сцены стоят статичными кадрами, подписи видны сразу */
 @media (prefers-reduced-motion: reduce) {
   .caption,
+  .remark,
   .tag {
     opacity: 1;
   }

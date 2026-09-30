@@ -8,10 +8,20 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2214%22 fill=%22%23ffd98a%22/%3E%3C/svg%3E">
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/cormorant-cyrillic-600-normal.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="assets/fonts/cormorant-cyrillic-500-italic.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/cormorant-sc-cyrillic-600-normal.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/pt-mono-cyrillic-400-normal.woff2" crossorigin>
   <link rel="preload" as="image" href="assets/window/window-room.webp">
   <link rel="preload" as="image" href="assets/window/window-city.webp">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.css">
-  <link rel="stylesheet" href="css/style.css?v=6">
+  <link rel="stylesheet" href="css/style.css?v=7">
+  <script>
+    // Занавес закрыт с первого кадра, дальше его держит и раскрывает прокрутка (main.js).
+    // Не загрузились скрипты — через 4 с раскрываем сами, чтобы страница не осталась за занавесом.
+    if (matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+      document.documentElement.classList.add('intro');
+      setTimeout(() => document.documentElement.classList.remove('intro'), 4000);
+    }
+  </script>
 </head>
 <body>
   <!-- Раскадровка — docs/storyboard.md. Каждая сцена собрана в кадре .frame 16:9, который
@@ -21,21 +31,28 @@
        на предыдущую (сама section закреплена, её transform трогать нельзя).
        ?debug в адресе включает маркеры ScrollTrigger и счётчик прогресса сцены. -->
 
+  <!-- Номера актов программки. --c — цвет заполнения: от ночного синего к рассветному. -->
   <nav class="scenes" aria-label="Сцены">
     <ol>
-      <li><a href="#window"><span class="scenes__fill"></span><span class="scenes__label">Окно</span></a></li>
-      <li><a href="#street"><span class="scenes__fill"></span><span class="scenes__label">Улица</span></a></li>
-      <li><a href="#edge"><span class="scenes__fill"></span><span class="scenes__label">Опушка</span></a></li>
-      <li><a href="#forest"><span class="scenes__fill"></span><span class="scenes__label">Лес</span></a></li>
-      <li><a href="#slope"><span class="scenes__fill"></span><span class="scenes__label">Склон</span></a></li>
-      <li><a href="#dawn"><span class="scenes__fill"></span><span class="scenes__label">Рассвет</span></a></li>
-      <li><a href="#backstage"><span class="scenes__fill"></span><span class="scenes__label">Закулисье</span></a></li>
+      <li style="--c: #7f95d1"><a href="#window"><span class="scenes__num">I</span><span class="scenes__bar"><span class="scenes__fill"></span></span><span class="scenes__label">Окно</span></a></li>
+      <li style="--c: #9392d0"><a href="#street"><span class="scenes__num">II</span><span class="scenes__bar"><span class="scenes__fill"></span></span><span class="scenes__label">Улица</span></a></li>
+      <li style="--c: #a98dc6"><a href="#edge"><span class="scenes__num">III</span><span class="scenes__bar"><span class="scenes__fill"></span></span><span class="scenes__label">Опушка</span></a></li>
+      <li style="--c: #c28fb3"><a href="#forest"><span class="scenes__num">IV</span><span class="scenes__bar"><span class="scenes__fill"></span></span><span class="scenes__label">Лес</span></a></li>
+      <li style="--c: #e89a8a"><a href="#slope"><span class="scenes__num">V</span><span class="scenes__bar"><span class="scenes__fill"></span></span><span class="scenes__label">Склон</span></a></li>
+      <li style="--c: #ffd98a"><a href="#dawn"><span class="scenes__num">VI</span><span class="scenes__bar"><span class="scenes__fill"></span></span><span class="scenes__label">Рассвет</span></a></li>
+      <li style="--c: #f4efe6"><a href="#backstage"><span class="scenes__num">VII</span><span class="scenes__bar"><span class="scenes__fill"></span></span><span class="scenes__label">Закулисье</span></a></li>
     </ol>
   </nav>
 
+  <!-- Часы до рассвета: время каждой сцены — в её data-time, main.js ведёт стрелки по прокрутке. -->
+  <div class="clock" aria-hidden="true">
+    <span class="clock__face"><i class="clock__h"></i><i class="clock__m"></i></span>
+    <span class="clock__text"><b class="clock__time">03:12</b><span class="clock__left">до рассвета 2 ч 35 мин</span></span>
+  </div>
+
   <main>
     <!-- 1. Окно: наезд камеры сквозь окно -->
-    <section class="scene s-window" id="window" data-length="200" aria-label="Окно">
+    <section class="scene s-window" id="window" data-time="03:12-03:40" data-length="300" aria-label="Окно">
       <div class="sheet"><div class="paper">
         <div class="frame">
           <div class="camera">
@@ -46,16 +63,27 @@
             </div>
           </div>
         </div>
-        <div class="title">
-          <h1>Рассвет</h1>
-          <p>Пойдёмте со мной</p>
+        <!-- Бумажный портал: ламбрекен, кулисы, рампа. Кулисы — scaleX от внешнего края: на входе закрыты, раскрываются прокруткой. -->
+        <div class="proscenium" aria-hidden="true">
+          <div class="curtain curtain--l"><i></i><b></b></div>
+          <div class="curtain curtain--r"><i></i><b></b></div>
+          <div class="valance"><i></i></div>
+          <div class="footlights"></div>
         </div>
+        <p class="curtain-cue">Листайте — занавес откроется</p>
+        <div class="title">
+          <p class="title__kicker">Бумажный театр представляет</p>
+          <h1 aria-label="Рассвет">Рассвет</h1>
+          <p class="title__sub">пьеса в семи листах<br>для одного героя и вашей прокрутки</p>
+          <p class="title__cue">Пойдёмте со мной</p>
+        </div>
+        <p class="remark">Лист I · Окно · 03:12</p>
         <div class="dim"></div>
       </div></div>
     </section>
 
     <!-- 2. Улица: горизонтальный параллакс внутри вертикального скролла -->
-    <section class="scene s-street" id="street" data-length="300" aria-label="Улица">
+    <section class="scene s-street" id="street" data-time="03:40-04:05" data-length="300" aria-label="Улица">
       <div class="sheet"><div class="paper">
         <div class="sky sky--street"></div>
         <div class="stars"></div>
@@ -78,12 +106,13 @@
           <span class="lamp"><img src="assets/street/street-lamp.webp" alt="" loading="lazy"></span>
         </div>
         <p class="caption"><span>Все спят. Самое время.</span></p>
+        <p class="remark">Лист II · Улица · 03:40</p>
         <div class="dim"></div>
       </div></div>
     </section>
 
     <!-- 3. Опушка: шторка-маска и смена поз -->
-    <section class="scene s-edge" id="edge" data-length="200" aria-label="Опушка">
+    <section class="scene s-edge" id="edge" data-time="04:05-04:26" data-length="200" aria-label="Опушка">
       <div class="sheet"><div class="paper">
         <div class="sky sky--street"></div>
         <div class="stars"></div>
@@ -99,12 +128,13 @@
           </div>
         </div>
         <p class="caption"><span>Помашу на прощание — и в лес.</span></p>
+        <p class="remark">Лист III · Опушка · 04:05</p>
         <div class="dim"></div>
       </div></div>
     </section>
 
     <!-- 4. Лес: движение камеры вглубь -->
-    <section class="scene s-forest" id="forest" data-length="250" aria-label="Лес">
+    <section class="scene s-forest" id="forest" data-time="04:26-05:02" data-length="250" aria-label="Лес">
       <div class="sheet"><div class="paper">
         <div class="frame">
           <img class="layer l-forest-far" src="assets/forest/forest-far.webp" alt="" loading="lazy">
@@ -118,12 +148,13 @@
           <img class="layer l-forest-front-right" src="assets/forest/forest-front-right.webp" alt="" loading="lazy">
         </div>
         <p class="caption"><span>Дорогу я знаю. Кажется.</span></p>
+        <p class="remark">Лист IV · Лес · 04:26</p>
         <div class="dim"></div>
       </div></div>
     </section>
 
     <!-- 5. Склон: цвет неба по скроллу, диагональ -->
-    <section class="scene s-slope" id="slope" data-length="200" aria-label="Склон">
+    <section class="scene s-slope" id="slope" data-time="05:02-05:30" data-length="200" aria-label="Склон">
       <div class="sheet"><div class="paper">
         <div class="sky sky--slope"></div>
         <div class="sky sky--predawn"></div>
@@ -136,12 +167,13 @@
           </div>
         </div>
         <p class="caption"><span>Ещё немного. Уже светлеет.</span></p>
+        <p class="remark">Лист V · Склон · 05:02</p>
         <div class="dim"></div>
       </div></div>
     </section>
 
     <!-- 6. Рассвет: солнце, свет, отъезд и крупный план -->
-    <section class="scene s-dawn" id="dawn" data-length="250" aria-label="Рассвет">
+    <section class="scene s-dawn" id="dawn" data-time="05:30-05:47" data-time-until="0.55" data-length="250" aria-label="Рассвет">
       <div class="sheet"><div class="paper">
         <div class="frame">
           <div class="camera">
@@ -161,6 +193,7 @@
           <img src="assets/hero/hero-face-closeup.webp" alt="Лицо героя в свете рассвета" loading="lazy">
         </div>
         <p class="caption"><span>Успел.</span></p>
+        <p class="remark">Лист VI · Рассвет · 05:30</p>
         <div class="dim"></div>
       </div></div>
     </section>
@@ -171,30 +204,51 @@
         <div class="view">
           <div class="frame">
             <div class="stage">
-              <div class="plate plate--sky"><div class="sky sky--dawn"></div><span class="tag">Небо — просто градиент</span></div>
-              <div class="plate plate--sun"><div class="sun"></div><span class="tag">Солнце — круг, который старается</span></div>
-              <div class="plate plate--hills"><img class="layer" src="assets/dawn/dawn-hills.webp" alt="" loading="lazy"><span class="tag">Холмы — вырезка №2</span></div>
-              <div class="plate plate--summit"><img class="layer" src="assets/dawn/dawn-summit.webp" alt="" loading="lazy"><span class="tag">Вершина — передний план</span></div>
+              <div class="plate plate--sky"><div class="sky sky--dawn"></div><span class="tag"><b>№ 1</b>Небо — просто градиент</span></div>
+              <div class="plate plate--sun"><div class="sun"></div><span class="tag"><b>№ 2</b>Солнце — круг, который старается</span></div>
+              <div class="plate plate--hills"><img class="layer" src="assets/dawn/dawn-hills.webp" alt="" loading="lazy"><span class="tag"><b>№ 3</b>Холмы — дальний план</span></div>
+              <div class="plate plate--summit"><img class="layer" src="assets/dawn/dawn-summit.webp" alt="" loading="lazy"><span class="tag"><b>№ 4</b>Вершина — передний план</span></div>
               <div class="plate plate--hero">
                 <div class="hero hero--dawn">
                   <img class="pose" src="assets/hero/hero-summit-rim.webp" alt="" loading="lazy">
                 </div>
-                <span class="tag">Я — одна из 15 поз</span>
+                <span class="tag"><b>№ 5</b>Я — одна из 15 поз</span>
               </div>
             </div>
           </div>
         </div>
         <p class="caption"><span>Открою секрет: я из бумаги.</span></p>
+        <p class="remark">Лист VII · Закулисье</p>
         <div class="dim"></div>
       </div></div>
     </section>
 
-    <!-- 8. Финал: без анимации -->
+    <!-- 8. Финал: программка спектакля и билет. Без анимации, кроме штампа. -->
     <section class="s-final" id="final" aria-label="Финал">
       <div class="sheet"><div class="paper">
-        <h2>Рассвет</h2>
-        <p>Меня вырезали, разложили по слоям и оживили вашей прокруткой. Спасибо, что дошли со мной.</p>
-        <p><a href="https://github.com/baslie/perekladka">Как меня собрали</a></p>
+        <div class="bill">
+          <p class="bill__kicker">Программка</p>
+          <h2>Рассвет</h2>
+          <p class="bill__lead">Пьеса в семи листах. Действие происходит ночью, с&nbsp;03:12 до&nbsp;05:47.</p>
+          <h3 class="bill__head">В ролях</h3>
+          <dl class="cast">
+            <div><dt>Я</dt><dd>одна вырезка в 15 позах</dd></div>
+            <div><dt>Солнце</dt><dd>круг, который старается</dd></div>
+            <div><dt>Небо</dt><dd>просто градиент</dd></div>
+            <div><dt>Туман</dt><dd>два слоя в дрейфе</dd></div>
+            <div><dt>Фонари</dt><dd>восемь копий одного</dd></div>
+            <div><dt>Вы</dt><dd>прокрутка</dd></div>
+          </dl>
+          <p class="bill__note">Меня вырезали, разложили по слоям и оживили вашей прокруткой. Спасибо, что дошли со мной.</p>
+          <div class="ticket">
+            <div class="ticket__stub">Контроль</div>
+            <div class="ticket__body">
+              <a href="https://github.com/baslie/perekladka">Как меня собрали</a>
+              <a class="ticket__again" href="#window">С начала ↑</a>
+            </div>
+          </div>
+          <p class="stamp" aria-hidden="true">Спектакль<br>окончен</p>
+        </div>
       </div></div>
     </section>
   </main>
@@ -205,6 +259,6 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js" defer></script>
-  <script src="js/main.js?v=6" defer></script>
+  <script src="js/main.js?v=7" defer></script>
 </body>
 </html>
